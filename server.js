@@ -37,7 +37,20 @@ app.post('/generate-pdf', async (req, res) => {
     await page.evaluate(() => document.fonts.ready);
     await new Promise(r => setTimeout(r, 2000));
 
-    // Get full page height
+    // Override ALL page-break CSS to prevent unwanted breaks and black gaps
+    await page.addStyleTag({ content: `
+      * {
+        page-break-before: auto !important;
+        break-before: auto !important;
+        page-break-after: auto !important;
+        break-after: auto !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      .cover { min-height: auto !important; }
+    `});
+
+    // Get full page height after styles applied
     const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
 
     const pdf = await page.pdf({
